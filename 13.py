@@ -1,8 +1,7 @@
 import re
-from typing import NamedTuple
 
 import numpy as np
-from scipy.optimize import LinearConstraint, Bounds, milp
+from scipy.optimize import LinearConstraint, milp
 
 data = """\
 Button A: X+94, Y+34
@@ -22,6 +21,7 @@ Button B: X+27, Y+71
 Prize: X=18641, Y=10279\
 """
 
+
 def part_one(data, part_two=False):
     pattern = re.compile("X[+=]([0-9]+), Y[+=]([0-9]+)")
     problems = data.split("\n\n")
@@ -29,8 +29,7 @@ def part_one(data, part_two=False):
     summm = 0
     for i, problem in enumerate(problems):
         (a_x, a_y), (b_x, b_y), (p_x, p_y) = (
-            (int(s), int(t))
-            for s, t in re.findall(pattern, problem)
+            (int(s), int(t)) for s, t in re.findall(pattern, problem)
         )
 
         if part_two:
@@ -49,7 +48,7 @@ def part_one(data, part_two=False):
             integrality=integrality,
             constraints=lc,
         )
-        
+
         if res.success:
             summ += res.fun
 
@@ -59,8 +58,13 @@ def part_one(data, part_two=False):
         times_b = (p_y * a_x - p_x * a_y) / (b_y * a_x - b_x * a_y)
         times_a = (p_x - b_x * times_b) / a_x
 
-        if times_a.is_integer() and times_b.is_integer():
+        valid = times_a.is_integer() and times_b.is_integer()
+
+        if valid:
             summm += times_a * 3 + times_b
+
+        if valid != res.success:
+            print(f"i={i} res={res.success} valid={valid}")
 
     return summ, summm
 
